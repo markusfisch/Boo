@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+<head>
+<title>Huh! The Ghosts Will Get You!</title>
+<style>
+
+html, body
+{
+	margin: 0; padding: 0;
+	background: #000;
+	font: 16pt monospace; color: #fff;
+	font-weight: bolder;
+	text-align: center;
+	line-height: 300%;
+	overflow: hidden;
+}
+
+canvas
+{
+	position: fixed;
+	left: 0; top: 0;
+}
+
+</style>
+</head>
+<body>
+<script>
+
+"use strict";
+
+Math.TAU = Math.TAU || Math.PI+Math.PI;
+
+var canvas,
+	ctx,
+	width,
+	height,
+	gameOver = false,
+	enemiesLength = 100,
+	enemies = [],
+	enemy = new Image(),
+	playerX = .5,
+	playerY = .5,
+	player = new Image(),
+	start;
+
+function drawSprite( sprite, x, y )
+{
+	ctx.drawImage(
+		sprite,
+		(x-8) | 0,
+		(y-8) | 0 );
+}
+
+function drawEnemies()
+{
+	for( var n = enemiesLength; n--; )
+	{
+		var e = enemies[n],
+			dx = playerX-e.x,
+			dy = playerY-e.y,
+			d = Math.sqrt( dx*dx + dy*dy ),
+			r = (1-d)*.01;
+
+		if( d < .02 )
+			gameOver = true;
+
+		e.x += dx/100*e.speed+Math.cos( e.alpha )*r;
+		e.y += dy/100*e.speed+Math.sin( e.alpha )*r;
+		e.alpha += .2;
+		e.speed += .03;
+
+		drawSprite(
+			enemy,
+			e.x*width,
+			e.y*height );
+	}
+}
+
+function drawPlayer()
+{
+	drawSprite(
+		player,
+		playerX*width,
+		playerY*height );
+}
+
+function run()
+{
+	ctx.clearRect( 0, 0, width, height );
+
+	if( gameOver )
+	{
+		document.body.innerHTML = "You survived "+
+			((new Date().getTime()-start)/1000 | 0)+" seconds!";
+		return;
+	}
+
+	drawEnemies();
+	drawPlayer();
+
+	requestAnimationFrame( run );
+}
+
+function pointerUp( ev )
+{
+	var e = (ev || event);
+
+	if( "pageX" in e )
+	{
+		playerX = e.pageX;
+		playerY = e.pageY;
+	}
+	else if( "clientX" in e )
+	{
+		playerX = e.clientX;
+		playerY = e.clientY;
+	}
+
+	playerX /= width;
+	playerY /= height;
+
+	e.preventDefault();
+	return false;
+}
+
+function resize()
+{
+	width = window.innerWidth;
+	height = window.innerHeight;
+
+	canvas.width = width;
+	canvas.height = height;
+	canvas.style.width = width+"px";
+	canvas.style.height = height+"px";
+}
+
+function reset()
+{
+	for( var n = enemiesLength; n--; )
+	{
+		var a = Math.random()*Math.TAU,
+			r = .3+Math.random()*.3;
+
+		enemies[n] = {
+			x: .5+Math.cos( a )*r,
+			y: .5+Math.sin( a )*r,
+			speed: .4+Math.random()*4,
+			alpha: a };
+	}
+}
+
+function init()
+{
+	var d = document;
+
+	if( !(canvas = d.createElement( "canvas" )) ||
+		!(ctx = canvas.getContext( "2d" )) )
+		return;
+
+	enemy.src = "ghost.png";
+	player.src = "player.png";
+
+	reset();
+
+	window.onresize = resize;
+	resize();
+
+	d.onmouseup = pointerUp;
+	d.body.appendChild( canvas );
+
+	start = new Date().getTime();
+	run();
+}
+
+window.onload = init;
+
+</script>
+</body>
+</html>
