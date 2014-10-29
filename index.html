@@ -1,36 +1,48 @@
 <!doctype html>
 <html>
 <head>
-<title>Huh! The Ghosts Will Get You!</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+<title>Huh!</title>
+<link rel="shortcut icon" href="ghost.png"/>
 <style>
 
 html, body
 {
 	margin: 0; padding: 0;
 	background: #000;
-	font: 16pt monospace; color: #fff;
-	font-weight: bolder;
-	text-align: center;
-	line-height: 300%;
 	overflow: hidden;
 }
 
-canvas
+canvas,
+#Message
 {
 	position: fixed;
 	left: 0; top: 0;
+	right: 0; bottom: 0;
+}
+
+#Message
+{
+	z-index: 1;
+	padding: 1em;
+	font: 16pt monospace; color: #fff;
+	font-weight: bolder;
+	text-align: center;
+	line-height: 150%;
 }
 
 </style>
 </head>
 <body>
+<div id="Message">Loading ...</div>
 <script>
 
 "use strict";
 
 Math.TAU = Math.TAU || Math.PI+Math.PI;
 
-var canvas,
+var message,
+	canvas,
 	ctx,
 	width,
 	height,
@@ -61,13 +73,28 @@ function drawEnemies()
 			d = Math.sqrt( dx*dx + dy*dy ),
 			r = (1-d)*.01;
 
-		if( d < .02 )
+		if( d < .01 )
 			gameOver = true;
 
-		e.x += dx/100*e.speed+Math.cos( e.alpha )*r;
-		e.y += dy/100*e.speed+Math.sin( e.alpha )*r;
-		e.alpha += .2;
-		e.speed += .03;
+		if( d < .2 )
+		{
+			var f = e.speed/d;
+
+			e.vx = dx*f;
+			e.vy = dy*f;
+
+			if( e.speed < .002 )
+				e.speed += .00001;
+		}
+
+		e.x += e.vx;
+		e.y += e.vy;
+
+		if( e.x < 0 || e.x > 1 )
+			e.vx = -e.vx;
+
+		if( e.y < 0 || e.y > 1 )
+			e.vy = -e.vy;
 
 		drawSprite(
 			enemy,
@@ -88,15 +115,18 @@ function run()
 {
 	ctx.clearRect( 0, 0, width, height );
 
-	if( gameOver )
-	{
-		document.body.innerHTML = "You survived "+
-			((new Date().getTime()-start)/1000 | 0)+" seconds!";
-		return;
-	}
-
 	drawEnemies();
 	drawPlayer();
+
+	if( gameOver )
+	{
+		message.innerHTML = "You survived "+
+			((new Date().getTime()-start)/1000 | 0)+" seconds!";
+
+		message.style.display = "block";
+
+		return;
+	}
 
 	requestAnimationFrame( run );
 }
@@ -105,15 +135,26 @@ function pointerUp( ev )
 {
 	var e = (ev || event);
 
-	if( "pageX" in e )
+	if( gameOver )
 	{
-		playerX = e.pageX;
-		playerY = e.pageY;
+		reset();
+		gameOver = false;
+		message.style.display = "none";
+		run();
+
+		e.preventDefault();
+		return false;
 	}
-	else if( "clientX" in e )
+
+	if( "clientX" in e )
 	{
 		playerX = e.clientX;
 		playerY = e.clientY;
+	}
+	else if( "pageX" in e )
+	{
+		playerX = e.pageX;
+		playerY = e.pageY;
 	}
 
 	playerX /= width;
@@ -139,37 +180,62 @@ function reset()
 	for( var n = enemiesLength; n--; )
 	{
 		var a = Math.random()*Math.TAU,
-			r = .3+Math.random()*.3;
+			va = Math.random()*Math.TAU,
+			r = .1+Math.random()*.4,
+			s = .0005;
 
 		enemies[n] = {
 			x: .5+Math.cos( a )*r,
 			y: .5+Math.sin( a )*r,
-			speed: .4+Math.random()*4,
-			alpha: a };
+			vx: Math.cos( va )*s,
+			vy: Math.sin( va )*s,
+			speed: s };
 	}
+
+	playerX = .5;
+	playerY = .5;
+
+	start = new Date().getTime();
 }
 
 function init()
 {
 	var d = document;
 
-	if( !(canvas = d.createElement( "canvas" )) ||
+	if( !(message = d.getElementById( "Message" )) ||
+		!(canvas = d.createElement( "canvas" )) ||
 		!(ctx = canvas.getContext( "2d" )) )
 		return;
 
-	enemy.src = "ghost.png";
-	player.src = "player.png";
-
-	reset();
+	enemy.src = "priest.png";
+	player.src = "ghost.png";
 
 	window.onresize = resize;
 	resize();
 
-	d.onmouseup = pointerUp;
-	d.body.appendChild( canvas );
+	function waitThenRun()
+	{
+		if( !enemy.complete ||
+			!player.complete )
+		{
+			setTimeout( waitThenRun, 500 );
+			return;
+		}
 
-	start = new Date().getTime();
-	run();
+		message.style.display = "none";
+
+		d.onmouseup = pointerUp;
+
+		if( "ontouchend" in d )
+			d.ontouchend = pointerUp;
+
+		d.body.appendChild( canvas );
+
+		reset();
+		run();
+	}
+
+	waitThenRun();
 }
 
 window.onload = init;
