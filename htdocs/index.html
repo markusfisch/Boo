@@ -29,7 +29,7 @@ canvas
 .Overlay
 {
 	position: fixed;
-	z-index: 2;
+	z-index: 3;
 	left: 0; top: 0;
 	right: 0; bottom: 0;
 	width: 100%; height: 100%;
@@ -109,34 +109,38 @@ var requestAnimFrame =
 			window.setTimeout( callback, 16 );
 		},
 	resources = {
-		ghost0: { rect: {/*ghost0*/x:33,y:0,w:9,h:15} },
-		ghost1: { rect: {/*ghost1*/x:31,y:30,w:9,h:14} },
-		ghost2: { rect: {/*ghost2*/x:31,y:15,w:9,h:15} },
-		priestCrow0: { rect: {/*priest-crow0*/x:12,y:0,w:12,h:15} },
-		priestCrow1: { rect: {/*priest-crow1*/x:0,y:0,w:12,h:15} },
-		priestWalkRight0: { rect: {/*priest-walk0*/x:24,y:0,w:9,h:15} },
-		priestWalkRight1: { rect: {/*priest-walk1*/x:0,y:15,w:11,h:14} },
-		priestWalkRight2: { rect: {/*priest-walk2*/x:12,y:31,w:8,h:15} },
-		priestWalkRight3: { rect: {/*priest-walk3*/x:0,y:29,w:8,h:16} },
-		priestWalkRight4: { rect: {/*priest-walk4*/x:21,y:15,w:10,h:15} },
-		priestWalkRight5: { rect: {/*priest-walk5*/x:21,y:30,w:10,h:14} },
-		priestWalkRight6: { rect: {/*priest-walk6*/x:40,y:15,w:6,h:15} },
-		priestWalkRight7: { rect: {/*priest-walk7*/x:12,y:15,w:9,h:16} },
-		priestWalkLeft0: { rect: {/*priest-walk0*/x:24,y:0,w:9,h:15},
+		ground: { rect: {/*ground*/x:0,y:0,w:32,h:32} },
+		ghost0: { rect: {/*ghost0*/x:72,y:14,w:10,h:14} },
+		ghost1: { rect: {/*ghost1*/x:82,y:14,w:9,h:14} },
+		ghost2: { rect: {/*ghost2*/x:91,y:0,w:7,h:14} },
+		ghost3: { rect: {/*ghost3*/x:82,y:0,w:9,h:14} },
+		ghost4: { rect: {/*ghost2*/x:91,y:0,w:7,h:14} },
+		ghost5: { rect: {/*ghost1*/x:82,y:14,w:9,h:14} },
+		priestCrow0: { rect: {/*priest-crow0*/x:32,y:15,w:12,h:15} },
+		priestCrow1: { rect: {/*priest-crow1*/x:32,y:0,w:12,h:15} },
+		priestWalkRight0: { rect: {/*priest-walk0*/x:44,y:16,w:9,h:15} },
+		priestWalkRight1: { rect: {/*priest-walk1*/x:53,y:0,w:11,h:14} },
+		priestWalkRight2: { rect: {/*priest-walk2*/x:64,y:16,w:8,h:15} },
+		priestWalkRight3: { rect: {/*priest-walk3*/x:64,y:0,w:8,h:16} },
+		priestWalkRight4: { rect: {/*priest-walk4*/x:53,y:14,w:10,h:15} },
+		priestWalkRight5: { rect: {/*priest-walk5*/x:72,y:0,w:10,h:14} },
+		priestWalkRight6: { rect: {/*priest-walk6*/x:91,y:14,w:6,h:15} },
+		priestWalkRight7: { rect: {/*priest-walk7*/x:44,y:0,w:9,h:16} },
+		priestWalkLeft0: { rect: {/*priest-walk0*/x:44,y:16,w:9,h:15},
 			mirror: true },
-		priestWalkLeft1: { rect: {/*priest-walk1*/x:0,y:15,w:11,h:14},
+		priestWalkLeft1: { rect: {/*priest-walk1*/x:53,y:0,w:11,h:14},
 			mirror: true },
-		priestWalkLeft2: { rect: {/*priest-walk2*/x:12,y:31,w:8,h:15},
+		priestWalkLeft2: { rect: {/*priest-walk2*/x:64,y:16,w:8,h:15},
 			mirror: true },
-		priestWalkLeft3: { rect: {/*priest-walk3*/x:0,y:29,w:8,h:16},
+		priestWalkLeft3: { rect: {/*priest-walk3*/x:64,y:0,w:8,h:16},
 			mirror: true },
-		priestWalkLeft4: { rect: {/*priest-walk4*/x:21,y:15,w:10,h:15},
+		priestWalkLeft4: { rect: {/*priest-walk4*/x:53,y:14,w:10,h:15},
 			mirror: true },
-		priestWalkLeft5: { rect: {/*priest-walk5*/x:21,y:30,w:10,h:14},
+		priestWalkLeft5: { rect: {/*priest-walk5*/x:72,y:0,w:10,h:14},
 			mirror: true },
-		priestWalkLeft6: { rect: {/*priest-walk6*/x:40,y:15,w:6,h:15},
+		priestWalkLeft6: { rect: {/*priest-walk6*/x:91,y:14,w:6,h:15},
 			mirror: true },
-		priestWalkLeft7: { rect: {/*priest-walk7*/x:12,y:15,w:9,h:16},
+		priestWalkLeft7: { rect: {/*priest-walk7*/x:44,y:0,w:9,h:16},
 			mirror: true },
 	},
 	atlas,
@@ -145,8 +149,10 @@ var requestAnimFrame =
 	messageText,
 	resizeTimer,
 	resizing,
-	canvas,
-	ctx,
+	canvasBack,
+	ctxBack,
+	canvasGame,
+	ctxGame,
 	ratio,
 	width,
 	height,
@@ -187,7 +193,7 @@ var requestAnimFrame =
 
 function drawSprite( sprite, x, y )
 {
-	ctx.drawImage(
+	ctxGame.drawImage(
 		sprite,
 		(x-sprite.centerX) | 0,
 		(y-sprite.centerY) | 0 );
@@ -216,8 +222,8 @@ function drawFragments()
 
 		var sin = Math.sin( f.spin )*scaleFactor*2;
 
-		ctx.fillStyle = f.color;
-		ctx.fillRect(
+		ctxGame.fillStyle = f.color;
+		ctxGame.fillRect(
 			(f.x+sin*f.vy) | 0,
 			(f.y-sin*f.vx) | 0,
 			scaleFactor | 0,
@@ -232,7 +238,7 @@ function drawPlayer()
 	if( now-playerFrameLast > frameFrequency )
 	{
 		++playerFrame;
-		playerFrame %= 3;
+		playerFrame %= 6;
 		playerFrameLast = now;
 	}
 
@@ -271,106 +277,125 @@ function setFragments()
 	}
 }
 
+function notifyPriests()
+{
+	for( var n = priestsLength; n--; )
+	{
+		var p = priests[n],
+			dx = p.x-playerX,
+			dy = p.y-playerY,
+			d = Math.sqrt( dx*dx + dy*dy );
+
+		p.crow = now+Math.random()*(d/scaleFactor)*10;
+	}
+}
+
 function killPlayer()
 {
 	playerAlive = false;
 	setFragments();
+	notifyPriests();
 
 	setTimeout(
 		function()
 		{
+			showMessage(
+				'You survived '+playerSurvived+' seconds!'+
+				'<div class="Buttons">'+
+				'<a onclick="restart()" class="Button">Try again</a>'+
+				'</div>' );
 			gameOver = true;
 		},
 		500 );
 }
 
-function drawPriestsCrowing()
+function drawPriestCrowing( p )
+{
+	if( now-p.lastFrame > frameFrequency )
+	{
+		++p.frame;
+		p.frame %= 2;
+		p.lastFrame = now;
+	}
+
+	drawSprite(
+		sprites["priestCrow"+(p.frame % 2)],
+		p.x,
+		p.y );
+}
+
+function drawPriestWalking( p )
+{
+	var state = "priestWalk"+(p.vx > 0 ? "Right" : "Left");
+
+	p.x += p.vx*factor;
+	p.y += p.vy*factor;
+
+	if( p.x < mapLeft ||
+		p.x > mapRight )
+	{
+		p.x = bounce( p.x, p.vx, mapLeft, mapRight );
+		p.vx = -p.vx;
+	}
+
+	if( p.y < mapTop ||
+		p.y > mapBottom )
+	{
+		p.y = bounce( p.y, p.vy, mapTop, mapBottom );
+		p.vy = -p.vy;
+	}
+
+	var dx = playerX-p.x,
+		dy = playerY-p.y,
+		d = dx*dx + dy*dy;
+
+	if( d < radiusSeen )
+	{
+		if( playerAlive &&
+			(d = Math.sqrt( d )) < radiusCastOut )
+			killPlayer();
+
+		d /= scaleFactor;
+		p.vx = dx/d;
+		p.vy = dy/d;
+	}
+
+	if( now-p.lastFrame > frameFrequency )
+	{
+		++p.frame;
+		p.frame %= 8;
+		p.lastFrame = now;
+	}
+
+	drawSprite(
+		sprites[state+p.frame],
+		p.x,
+		p.y );
+}
+
+function drawPriests()
 {
 	for( var n = priestsLength; n--; )
 	{
 		var p = priests[n];
 
-		if( now-p.lastFrame > frameFrequency )
-		{
-			++p.frame;
-			p.frame %= 2;
-			p.lastFrame = now;
-		}
-
-		drawSprite(
-			sprites["priestCrow"+(p.frame % 2)],
-			p.x,
-			p.y );
-	}
-}
-
-function drawPriestsWalking()
-{
-	for( var n = priestsLength; n--; )
-	{
-		var p = priests[n],
-			state = "priestWalk"+(p.vx > 0 ? "Right" : "Left");
-
-		p.x += p.vx*factor;
-		p.y += p.vy*factor;
-
-		if( p.x < mapLeft ||
-			p.x > mapRight )
-		{
-			p.x = bounce( p.x, p.vx, mapLeft, mapRight );
-			p.vx = -p.vx;
-		}
-
-		if( p.y < mapTop ||
-			p.y > mapBottom )
-		{
-			p.y = bounce( p.y, p.vy, mapTop, mapBottom );
-			p.vy = -p.vy;
-		}
-
-		var dx = playerX-p.x,
-			dy = playerY-p.y,
-			d = dx*dx + dy*dy;
-
-		if( d < radiusSeen )
-		{
-			if( playerAlive &&
-				(d = Math.sqrt( d )) < radiusCastOut )
-				killPlayer();
-
-			d /= scaleFactor;
-			p.vx = dx/d;
-			p.vy = dy/d;
-		}
-
-		if( now-p.lastFrame > frameFrequency )
-		{
-			++p.frame;
-			p.frame %= 8;
-			p.lastFrame = now;
-		}
-
-		drawSprite(
-			sprites[state+p.frame],
-			p.x,
-			p.y );
+		if( p.crow < now )
+			drawPriestCrowing( p );
+		else
+			drawPriestWalking( p );
 	}
 }
 
 function draw()
 {
-	ctx.clearRect( 0, 0, width, height );
+	ctxGame.clearRect( 0, 0, width, height );
+
+	drawPriests();
 
 	if( playerAlive )
-	{
-		drawPriestsWalking();
 		drawPlayer();
-	}
 	else
-	{
 		drawFragments();
-		drawPriestsCrowing();
-	}
 }
 
 function playSound( id )
@@ -429,6 +454,7 @@ function createPriests()
 			y: y,
 			vx: Math.cos( a )*speed,
 			vy: Math.sin( a )*speed,
+			crow: now+now,
 			frame: Math.random()*8 | 0,
 			lastFrame: 0 };
 	}
@@ -447,6 +473,22 @@ function reset()
 	priestsLength = 16;
 
 	createPriests()
+
+	var sprite = sprites.ground;
+
+	for( var y = 0, h = sprite.height; y < height; y += h )
+		for( var x = 0, w = sprite.width; x < width; x += w )
+			ctxBack.drawImage(
+				sprite,
+				x,
+				y );
+}
+
+function restart()
+{
+	hideMessage();
+	reset();
+	pointerLength = 0;
 }
 
 function input()
@@ -456,8 +498,7 @@ function input()
 			keysDown[32] ||
 			keysDown[13]) )
 	{
-		reset();
-		pointerLength = 0;
+		restart();
 		return;
 	}
 
@@ -485,12 +526,12 @@ function run()
 	factor = (now-last)/16;
 	last = now;
 
-	/*if( playerAlive &&
+	if( playerAlive &&
 		now-playerSurvivedLast > 1000 )
 	{
 		++playerSurvived;
 		playerSurvivedLast = now;
-	}*/
+	}
 
 	input();
 	draw();
@@ -710,10 +751,10 @@ function resize()
 	width = w*ratio | 0;
 	height = h*ratio | 0;
 
-	canvas.width = width;
-	canvas.height = height;
-	canvas.style.width = w+"px";
-	canvas.style.height = h+"px";
+	canvasBack.width = canvasGame.width = width;
+	canvasBack.height = canvasGame.height = height;
+	canvasBack.style.width = canvasGame.style.width = w+"px";
+	canvasBack.style.height = canvasGame.style.height = h+"px";
 
 	centerX = width >> 1;
 	centerY = height >> 1;
@@ -832,7 +873,8 @@ function init()
 	decompressAtlas();
 	createFragments();
 
-	document.body.appendChild( canvas );
+	document.body.appendChild( canvasBack );
+	document.body.appendChild( canvasGame );
 
 	resize();
 	window.onresize = scheduleResize;
@@ -863,17 +905,19 @@ function indexSounds()
 
 function createCanvas()
 {
-	if( !(canvas = document.createElement( "canvas" )) ||
-		!(ctx = canvas.getContext( "2d", { alpha: false } )) )
+	if( !(canvasBack = document.createElement( "canvas" )) ||
+		!(ctxBack = canvasBack.getContext( "2d", { alpha: false } )) ||
+		!(canvasGame = document.createElement( "canvas" )) ||
+		!(ctxGame = canvasGame.getContext( "2d" )) )
 		return false;
 
 	ratio =
 		(window.devicePixelRatio || 1)/
-		(ctx.webkitBackingStorePixelRatio ||
-			ctx.mozBackingStorePixelRatio ||
-			ctx.msBackingStorePixelRatio ||
-			ctx.oBackingStorePixelRatio ||
-			ctx.backingStorePixelRatio ||
+		(ctxBack.webkitBackingStorePixelRatio ||
+			ctxBack.mozBackingStorePixelRatio ||
+			ctxBack.msBackingStorePixelRatio ||
+			ctxBack.oBackingStorePixelRatio ||
+			ctxBack.backingStorePixelRatio ||
 			1);
 
 	return true;
@@ -896,7 +940,7 @@ function load()
 	last = new Date().getTime();
 
 	atlas = new Image();
-	atlas.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAAuCAMAAABgZ9sFAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAilBMVEUAAAD///+JS0uQVFT///////9AQECAgID7+/ugoKCenp6ISkr+/v78/Pz///+fn5/9/f2QkJD7+/t/f3+AgIBqLy+haGjv7+/+/v5wcHACAACiaWkBAAD///+MT0+QVFSPU1OJS0uISkpAQECgoKDf39+enp6fn5/9/f2JTEz7+vr8/PyIS0v8+/tt8CM3AAAAEXRSTlMAGf39Iv39/f39/f39/TD9/RE4b5AAAAABYktHRAH/Ai3eAAACkElEQVRIx4WVi3abMAxAZVaSsHXrTLyC27ppZ8Dpsv3/702y5AchO3NPcoS5KMK+VgEAtNaQhsQ9fR3TvFIqA2B+MNOXuO/x4tg8Cj2MQ+Ht0/NTQiSOj9rm5VFoV/H20/NrRuq44fR3DvDvLuOn11NGTm8xfo/4T04e8Zze4sgIx7rn2EBLOI1RJdroOPoS07y3k9GtaxkfKtykpazjHeGUfXRUi+AWEDF6E3vIOBU/FxyZ/SZG3EzT1CA+4zqm2t8JsftN3IDRxnAxg5vXK2NuxFobyws5O7XC4/xVPGFywVEZV3ZVPut4kjfwoAgttE1fq3hKfIXKOBaDS7jRN01kU+uw0pdfM08kU1dh0ZcUUITLrWTqKtzoe0y3xNR1uNH3mG7x1rRJTzjIJG2vivYSbmT1dlYv6JIj3gatDwfkQyAFVjjuG9EQ8Zjd20VzdqIZp2oc7pQ8j7gRHC0UPGCOCh8IZ7V3gHmmDlVlfPncEK7P2viGihkc4/G8fUH1oktcDNV1gPvm/nw+6+QjPqC+fmBn+QXQdUHvs2ImCUnZCSd5Z5KMTzN0cXUqxz0fbDmzyqE0jl4+6sZjJ3wQCb1cBfaRcZktFoaY2PMnXYvCIVxbmKduCryxcCX+tcAFT3eq38m+fksC37LwpTooN/tvdm8tfvL1uv8CLEH6XC0++bpPhykqJuOBum7+nZxjqQUeMv4AdtTjron4ZKSFLZAFpv5bikFcjyk799yWcFP5Xi/lA9JjwrWcE8QvxnjfKPa31A6/8/9VbNGc/c/H98vlEgV286r/QotVhk5wG3htvDcXvURcza1qq20iGQW3qSzP7xvtUgNc0XhGOOxqmZal+FjwXf3kiv/PqJ78x/gLGrlMh4WiHksAAAAASUVORK5CYII=";
+	atlas.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGIAAAAgCAMAAADe611bAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAACQUExURQAAAAsLC4lLS5BUVPv7+////4CAgEBAQJ+fn56enqCgoIhKSv39/f7+/vz8/CAgIBUVFQsLC5CQkH9/f+/v7////xYWFoCAgGovL/v7+6FoaHBwcAIAAKJpaQEAAIxPT5BUVIhKSolLS5+fn56enkBAQM/Pz/7+/qCgoPz8/Pz7+4lMTIhLS49TU/39/fv6+nRhzkcAAAAPdFJOUwD9/f39/f39/f39/f39/W3sy9EAAAABYktHRAX4b+nHAAAAB3RJTUUH3gsLFBINWVtmLQAABGlJREFUSMelVmt32zYMBbU4arO1fFgmm6lt0spW5LXz/v+/Ky4AUrLTs34ok4gQj3Iv8eAFyfkQQwgu8BTZcphidFjhN0dEKSWqY9/sn1jr0nAY1olhPGN5UPDT5Rg8U3nn+C0HpigflOMRIN3fFfe1tS4NhwPAbcrRCxb/8v49dh/FryDETDF+/PSRKR4fmWPsPhvMT6x9WzrgZxh0IhcVK2PmADkfxSWLHij++PRUvRi7rgG/svbVUGweMlHwOQSjATAos4dDvJJ9YIjnp+eV4gtV4FfWvhoI0DoohyxRysITkQFxR0kyKHiA4ivgxpLoToDZJNqpdS/IpRpKUYkoRh/VhaAllKOUloSL/wRVhngxpXR3xxz9mI6JdgfmOE5FCul4TKVUCg7QYBNhx3BDnqCI3pyQrHtQlFq2p/GYxIuehAJevMEWwEDMsKEYhrlRaIywa85BxgHxGieOoA8jMUUxBtpQFKV4Q+NLeuk7pigbCkDPUrRMgXhkrSdxI0rohASFMIob9yvF8W0HCoZbHpYOFOlFvSjnUk6nzs7DLDP7QkELVPLhmIsrSk4IJx7s+SsoLI0cKITnjv4kRGXUQDHDC9E/3/46n8/q7azQNAwyMY7sVjfNBRX1xeNU8ItWVKkFKsBEDw9Tuh917btm6nQq53QUBoOGMfNspcRnWlFNo9oh1/I0NJarMp5AgZdelnbsz/SAKEq0gMywsyZlpkZh5SNlqkcww4igOJH9P49pY1OvHH2llMKt6BoxeUrRivTVoxHrU0LGAZAoNIZqV1ntNXBNXWlj6Td6lH3FFkVUeMl6WMWcj940rapeJcp8qbK6teybDEFyQAaP49ONI+ijpgQUJuaitGtLWPXVVkxWqwhupJdzHF0NjYdIqcpKeqJolIr5Tb+o+rq/VldwNTKTXqlMyKsKiAQrqrjDiXwr5muX+HLljUre0KzDKr1Bw5KtnFzNs/VZEfN/n5vSrl3CZLWumLrOzVLpFYomtNHkFtIUYwyNQsU8XfWLaTJZrSumeQMOnKofUywJ3yiaxkg6XbQgIe0sWE3M696LNImpyuo4jtSScWj5FsO2Ea1J+1gt+MGtMMsRdzdivpSEJjGx+BnFspVXQZ6rDE4q0bFqLHKrAbNG7vmycC3m3IiYAl5MlC6pQFVtZafA9W6jIZu0j6FFIx3eqJgmVzFkub0VcwV81727XC5JvUjamlp7EAtK+P4bn6X/+OjhftC6BXq491q2UmZxK+ZMUZaFmwSO/CVpoDin4oVyiLRCxed5IOvGpoJZmh1zOL1SeWl90fmtmHdUkIGddg7ND/NP9S4yVwWcpbI4nCJngPQ+1LICPvsVRWWdk3vUjZhTU9sJaR/RkK6ltc6Tfsj7Fiey6DfXUAaydCju3t5difmSrCWtyts3IX89TDWj9bw2fJZUZ82/24r5Yhk5bWB6+h8OHVnLyNkdzbUOhUbOHm6/XSrHlqKnXw2nB5tFXC5/woGbuRdDLv+/OX4A0ruUGIlh9NsAAAAASUVORK5CYII=";
 	atlas.onload = init;
 }
 
