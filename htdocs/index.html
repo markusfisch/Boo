@@ -1,0 +1,907 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="msapplication-tap-highlight" content="no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+<title>Boo!</title>
+<link rel="shortcut icon" href="icon.png"/>
+<link rel="apple-touch-icon-precomposed" href="icon.png"/>
+<style>
+
+html,
+body
+{
+	background: #111;
+	margin: 0; padding: 0;
+	overflow: hidden;
+	-ms-touch-action: none;
+	font: 20pt serif; color: #fff;
+}
+
+canvas
+{
+	position: fixed;
+	left: 0; top: 0;
+	z-index: 1;
+}
+
+.Overlay
+{
+	position: fixed;
+	z-index: 2;
+	left: 0; top: 0;
+	right: 0; bottom: 0;
+	width: 100%; height: 100%;
+	padding: 0;
+	background: rgba( 17, 17, 17, .75 );
+	-webkit-transform-style: preserve-3d;
+	transform-style: preserve-3d;
+}
+
+.Center
+{
+	position: relative;
+	top: 50%;
+	-webkit-transform: translateY( -50% );
+	transform: translateY( -50% );
+	max-width: 30em;
+	margin: 0 auto; padding: 1em;
+	text-align: center;
+}
+
+.Buttons
+{
+	margin: 2em 0 0;
+}
+
+.Text,
+.Button
+{
+	margin: 0 auto; padding: 0;
+	font-weight: lighter;
+	letter-spacing: .2em;
+	line-height: 150%;
+	font-variant: small-caps;
+}
+
+.Button
+{
+	background: #333; color: #fff;
+	display: inline-block;
+	margin: .25em; padding: .4em 1.5em;
+	border: 0; outline: 0;
+	border-radius: .2em;
+	text-decoration: none;
+	cursor: default;
+}
+
+@media screen and (max-width: 600px), screen and (max-height: 600px)
+{
+	.Text
+	{
+		font-size: 14pt;
+	}
+}
+
+</style>
+<head>
+<body>
+<div id="Message" class="Overlay">
+	<div class="Center">
+		<div id="MessageText" class="Text">Initializing...</div>
+	</div>
+</div>
+<script>
+
+"use strict";
+
+Math.TAU = Math.TAU || Math.PI*2;
+
+var requestAnimFrame =
+		window.requestAnimationFrame ||
+		window.webkitRequestAnimationFrame ||
+		window.mozRequestAnimationFrame ||
+		window.msRequestAnimationFrame ||
+		window.oRequestAnimationFrame ||
+		function( callback )
+		{
+			window.setTimeout( callback, 16 );
+		},
+	resources = {
+		ghost0: { rect: {/*ghost0*/x:33,y:0,w:9,h:15} },
+		ghost1: { rect: {/*ghost1*/x:31,y:30,w:9,h:14} },
+		ghost2: { rect: {/*ghost2*/x:31,y:15,w:9,h:15} },
+		priestCrow0: { rect: {/*priest-crow0*/x:12,y:0,w:12,h:15} },
+		priestCrow1: { rect: {/*priest-crow1*/x:0,y:0,w:12,h:15} },
+		priestWalkRight0: { rect: {/*priest-walk0*/x:24,y:0,w:9,h:15} },
+		priestWalkRight1: { rect: {/*priest-walk1*/x:0,y:15,w:11,h:14} },
+		priestWalkRight2: { rect: {/*priest-walk2*/x:12,y:31,w:8,h:15} },
+		priestWalkRight3: { rect: {/*priest-walk3*/x:0,y:29,w:8,h:16} },
+		priestWalkRight4: { rect: {/*priest-walk4*/x:21,y:15,w:10,h:15} },
+		priestWalkRight5: { rect: {/*priest-walk5*/x:21,y:30,w:10,h:14} },
+		priestWalkRight6: { rect: {/*priest-walk6*/x:40,y:15,w:6,h:15} },
+		priestWalkRight7: { rect: {/*priest-walk7*/x:12,y:15,w:9,h:16} },
+		priestWalkLeft0: { rect: {/*priest-walk0*/x:24,y:0,w:9,h:15},
+			mirror: true },
+		priestWalkLeft1: { rect: {/*priest-walk1*/x:0,y:15,w:11,h:14},
+			mirror: true },
+		priestWalkLeft2: { rect: {/*priest-walk2*/x:12,y:31,w:8,h:15},
+			mirror: true },
+		priestWalkLeft3: { rect: {/*priest-walk3*/x:0,y:29,w:8,h:16},
+			mirror: true },
+		priestWalkLeft4: { rect: {/*priest-walk4*/x:21,y:15,w:10,h:15},
+			mirror: true },
+		priestWalkLeft5: { rect: {/*priest-walk5*/x:21,y:30,w:10,h:14},
+			mirror: true },
+		priestWalkLeft6: { rect: {/*priest-walk6*/x:40,y:15,w:6,h:15},
+			mirror: true },
+		priestWalkLeft7: { rect: {/*priest-walk7*/x:12,y:15,w:9,h:16},
+			mirror: true },
+	},
+	atlas,
+	atlasWidth,
+	message,
+	messageText,
+	resizeTimer,
+	resizing,
+	canvas,
+	ctx,
+	ratio,
+	width,
+	height,
+	centerX,
+	centerY,
+	scaleFactor,
+	mapLeft,
+	mapTop,
+	mapRight,
+	mapBottom,
+	sprites = [],
+	running,
+	now,
+	last,
+	factor,
+	audioChannelsLength = 4,
+	audioChannels = [],
+	sounds = {},
+	pointerLength = 0,
+	pointerX = [],
+	pointerY = [],
+	keysDown = [],
+	gameOver,
+	frameFrequency = 100,
+	priestsLength,
+	priests = [],
+	radiusSeen,
+	radiusCastOut,
+	playerX,
+	playerY,
+	playerFrame,
+	playerFrameLast,
+	playerAlive,
+	playerSurvived,
+	playerSurvivedLast,
+	fragmentsLength,
+	fragments = [];
+
+function drawSprite( sprite, x, y )
+{
+	ctx.drawImage(
+		sprite,
+		(x-sprite.centerX) | 0,
+		(y-sprite.centerY) | 0 );
+}
+
+function drawFragments()
+{
+	for( var n = fragmentsLength; n--; )
+	{
+		var f = fragments[n];
+
+		if( f.x < 0 ||
+			f.x > width ||
+			f.y < 0 ||
+			f.y > height )
+			continue;
+
+		f.x += f.vx*factor;
+		f.y += f.vy*factor;
+		f.spin += factor*.1;
+		++f.live;
+
+		var a = 1.05;
+		f.vx *= a;
+		f.vy *= a;
+
+		var sin = Math.sin( f.spin )*scaleFactor*2;
+
+		ctx.fillStyle = f.color;
+		ctx.fillRect(
+			(f.x+sin*f.vy) | 0,
+			(f.y-sin*f.vx) | 0,
+			scaleFactor | 0,
+			scaleFactor | 0 );
+	}
+}
+
+function drawPlayer()
+{
+	var state = "ghost";
+
+	if( now-playerFrameLast > frameFrequency )
+	{
+		++playerFrame;
+		playerFrame %= 3;
+		playerFrameLast = now;
+	}
+
+	drawSprite(
+		sprites[state+playerFrame],
+		playerX,
+		playerY+Math.sin( now*.002 )*scaleFactor );
+}
+
+function bounce( value, change, min, max )
+{
+	var l = max-min,
+		r;
+
+	if( (r = value-min) < change )
+		value = min-(r % l);
+	else if( (r = value-max) > change )
+		value = max-(r % l);
+
+	return value;
+}
+
+function setFragments()
+{
+	for( var n = fragmentsLength; n--; )
+	{
+		var f = fragments[n],
+			speed = (.005+Math.random()*.1)*scaleFactor;
+
+		f.x = playerX+f.ox*scaleFactor;
+		f.y = playerY+f.oy*scaleFactor;
+		f.vx = f.ovx*speed;
+		f.vy = f.ovy*speed;
+		f.spin = Math.random()*Math.TAU;
+		f.live = 0;
+	}
+}
+
+function killPlayer()
+{
+	playerAlive = false;
+	setFragments();
+
+	setTimeout(
+		function()
+		{
+			gameOver = true;
+		},
+		500 );
+}
+
+function drawPriestsCrowing()
+{
+	for( var n = priestsLength; n--; )
+	{
+		var p = priests[n];
+
+		if( now-p.lastFrame > frameFrequency )
+		{
+			++p.frame;
+			p.frame %= 2;
+			p.lastFrame = now;
+		}
+
+		drawSprite(
+			sprites["priestCrow"+(p.frame % 2)],
+			p.x,
+			p.y );
+	}
+}
+
+function drawPriestsWalking()
+{
+	for( var n = priestsLength; n--; )
+	{
+		var p = priests[n],
+			state = "priestWalk"+(p.vx > 0 ? "Right" : "Left");
+
+		p.x += p.vx*factor;
+		p.y += p.vy*factor;
+
+		if( p.x < mapLeft ||
+			p.x > mapRight )
+		{
+			p.x = bounce( p.x, p.vx, mapLeft, mapRight );
+			p.vx = -p.vx;
+		}
+
+		if( p.y < mapTop ||
+			p.y > mapBottom )
+		{
+			p.y = bounce( p.y, p.vy, mapTop, mapBottom );
+			p.vy = -p.vy;
+		}
+
+		var dx = playerX-p.x,
+			dy = playerY-p.y,
+			d = dx*dx + dy*dy;
+
+		if( d < radiusSeen )
+		{
+			if( playerAlive &&
+				(d = Math.sqrt( d )) < radiusCastOut )
+				killPlayer();
+
+			d /= scaleFactor;
+			p.vx = dx/d;
+			p.vy = dy/d;
+		}
+
+		if( now-p.lastFrame > frameFrequency )
+		{
+			++p.frame;
+			p.frame %= 8;
+			p.lastFrame = now;
+		}
+
+		drawSprite(
+			sprites[state+p.frame],
+			p.x,
+			p.y );
+	}
+}
+
+function draw()
+{
+	ctx.clearRect( 0, 0, width, height );
+
+	if( playerAlive )
+	{
+		drawPriestsWalking();
+		drawPlayer();
+	}
+	else
+	{
+		drawFragments();
+		drawPriestsCrowing();
+	}
+}
+
+function playSound( id )
+{
+	var e = sounds[id];
+
+	if( !e )
+		return;
+
+	for( var n = audioChannelsLength; n--; )
+	{
+		var ac = audioChannels[n];
+
+		if( ac.finished < now )
+		{
+			ac.finished = now+e.duration*1000;
+
+			var ch = ac.channel;
+
+			if( ch.src != e.src )
+			{
+				ch.src = e.src;
+				ch.load();
+			}
+			else
+				ch.currentTime = 0;
+
+			ch.play();
+
+			break;
+		}
+	}
+}
+
+function createPriests()
+{
+	var w = mapRight-mapLeft,
+		h = mapBottom-mapTop,
+		min = Math.min( w, h )*.3;
+
+	for( var n = priestsLength; n--; )
+	{
+		var a = Math.random()*Math.TAU,
+			speed = (.4+Math.random()*.6)*scaleFactor,
+			x,
+			y;
+
+		do
+		{
+			x = mapLeft+Math.random()*w,
+			y = mapTop+Math.random()*h;
+		} while( Math.abs( x-playerX )+Math.abs( y-playerY ) < min );
+
+		priests[n] = {
+			x: x,
+			y: y,
+			vx: Math.cos( a )*speed,
+			vy: Math.sin( a )*speed,
+			frame: Math.random()*8 | 0,
+			lastFrame: 0 };
+	}
+}
+
+function reset()
+{
+	gameOver = false;
+
+	playerX = centerX;
+	playerY = centerY;
+	playerAlive = true;
+	playerFrameLast = playerFrame = 0;
+	playerSurvivedLast = playerSurvived = 0;
+
+	priestsLength = 16;
+
+	createPriests()
+}
+
+function input()
+{
+	if( gameOver &&
+		(pointerLength > 0 ||
+			keysDown[32] ||
+			keysDown[13]) )
+	{
+		reset();
+		pointerLength = 0;
+		return;
+	}
+
+	for( var n = Math.min( pointerLength, 1 ); n--; )
+	{
+		playerX = pointerX[n];
+
+		if( playerX < mapLeft )
+			playerX = mapLeft;
+		else if( playerX > mapRight )
+			playerX = mapRight;
+
+		playerY = pointerY[n];
+
+		if( playerY < mapTop )
+			playerY = mapTop;
+		else if( playerY > mapBottom )
+			playerY = mapBottom;
+	}
+}
+
+function run()
+{
+	now = new Date().getTime();
+	factor = (now-last)/16;
+	last = now;
+
+	/*if( playerAlive &&
+		now-playerSurvivedLast > 1000 )
+	{
+		++playerSurvived;
+		playerSurvivedLast = now;
+	}*/
+
+	input();
+	draw();
+
+	requestAnimFrame( run );
+}
+
+function setPointers( ev, down )
+{
+	var e = ev || event;
+
+	if( down < 1 )
+	{
+		// process remaining touches
+		if( pointerLength > 0 &&
+			e.touches &&
+			(down = e.touches.length) )
+			return setPointers( e, down );
+
+		pointerLength = 0;
+	}
+	else if( e.touches )
+	{
+		pointerLength = e.touches.length;
+
+		for( var n = 0; n < pointerLength; ++n )
+		{
+			var t = e.touches[n];
+
+			pointerX[n] = t.pageX;
+			pointerY[n] = t.pageY;
+		}
+	}
+	else if( typeof e.clientX !== "undefined" )
+	{
+		pointerX[0] = e.clientX;
+		pointerY[0] = e.clientY;
+		pointerLength = 1;
+	}
+	else if( typeof e.pageX !== "undefined" )
+	{
+		pointerX[0] = e.pageX;
+		pointerY[0] = e.pageY;
+		pointerLength = 1;
+	}
+
+	if( ratio != 1 )
+		for( var n = 0; n < pointerLength; ++n )
+		{
+			pointerX[n] = pointerX[n]*ratio | 0;
+			pointerY[n] = pointerY[n]*ratio | 0;
+		}
+
+	// to avoid overscrolling on iOS it's important to
+	// catch pointer events
+	e.preventDefault();
+	return false;
+}
+
+function pointerUp( ev )
+{
+	return setPointers( ev, 0 );
+}
+
+function pointerMove( ev )
+{
+	return setPointers( ev, pointerLength );
+}
+
+function pointerDown( ev )
+{
+	return setPointers( ev, 1 );
+}
+
+function setKey( ev, pressed )
+{
+	var e = ev || event;
+
+	keysDown[e.keyCode] = pressed;
+
+	e.preventDefault();
+	return false;
+}
+
+function keyUp( ev )
+{
+	return setKey( ev, false );
+}
+
+function keyDown( ev )
+{
+	return setKey( ev, true );
+}
+
+function scaleSprite( res, rect, w, h )
+{
+	var c = document.createElement( "canvas" ),
+		x = c.getContext( "2d" );
+
+	c.width = w;
+	c.height = h;
+
+	c.centerX = w >> 1;
+	c.centerY = h >> 1;
+
+	var offset = rect.y*(atlasWidth << 2)+(rect.x << 2),
+		skip = (atlasWidth-rect.w) << 2,
+		xs = 0,
+		xf = scaleFactor;
+
+	if( res.mirror )
+	{
+		xf = -xf;
+		xs = (scaleFactor*rect.w+xf) | 0;
+	}
+
+	for( var ay = rect.h, sy = 0;
+		ay--;
+		offset += skip, sy += scaleFactor )
+		for( var ax = rect.w, sx = xs;
+			ax--;
+			sx += xf )
+		{
+			var r = atlas[offset++],
+				g = atlas[offset++],
+				b = atlas[offset++],
+				a = atlas[offset++];
+
+			if( a == 0 )
+				continue;
+
+			x.fillStyle = 'rgba('+r+','+g+','+b+','+(a/255)+')';
+			x.fillRect( sx, sy, scaleFactor, scaleFactor );
+		}
+
+	return c;
+}
+
+function scale( min )
+{
+	scaleFactor = Math.round( min/16/resources.ghost0.rect.h );
+
+	for( var name in resources )
+	{
+		var res = resources[name],
+			rc = res.rect,
+			w = Math.max( rc.w*scaleFactor | 0, 1 ),
+			h = Math.max( rc.h*scaleFactor | 0, 1 );
+
+		sprites[name] = scaleSprite( res, rc, w, h );
+	}
+}
+
+function disablePointer()
+{
+	var d = document;
+
+	d.onmousedown =
+	d.onmousemove =
+	d.onmouseup =
+	d.onmouseout = null;
+
+	if( "ontouchstart" in d )
+	{
+		d.ontouchstart =
+		d.ontouchmove =
+		d.ontouchend =
+		d.ontouchleave =
+		d.ontouchcancel = null;
+	}
+
+	pointerLength = 0;
+}
+
+function enablePointer()
+{
+	var d = document;
+
+	d.onmousedown = pointerDown;
+	d.onmousemove = pointerMove;
+	d.onmouseup = pointerUp;
+	d.onmouseout = pointerUp;
+
+	if( "ontouchstart" in d )
+	{
+		d.ontouchstart = pointerDown;
+		d.ontouchmove = pointerMove;
+		d.ontouchend = pointerUp;
+		d.ontouchleave = pointerUp;
+		d.ontouchcancel = pointerUp;
+	}
+}
+
+function hideMessage()
+{
+	message.style.display = "none";
+	enablePointer();
+}
+
+function setMessage( text )
+{
+	messageText.innerHTML = text;
+}
+
+function showMessage( text )
+{
+	disablePointer();
+	setMessage( text );
+	message.style.display = "block";
+}
+
+function resize()
+{
+	var w = window.innerWidth,
+		h = window.innerHeight;
+
+	width = w*ratio | 0;
+	height = h*ratio | 0;
+
+	canvas.width = width;
+	canvas.height = height;
+	canvas.style.width = w+"px";
+	canvas.style.height = h+"px";
+
+	centerX = width >> 1;
+	centerY = height >> 1;
+
+	var min = Math.min( width, height );
+	mapLeft = (width-min) >> 1;
+	mapTop = (height-min) >> 1;
+	mapRight = mapLeft+min;
+	mapBottom = mapTop+min;
+
+	scale( min );
+	reset();
+
+	radiusSeen = min*.2 | 0;
+	radiusSeen *= radiusSeen;
+	radiusCastOut = sprites.ghost0.width*.5 | 0;
+
+	if( resizing )
+	{
+		hideMessage();
+		resizing = false;
+	}
+}
+
+function scheduleResize()
+{
+	if( resizeTimer )
+		clearTimeout( resizeTimer );
+
+	if( running )
+	{
+		resizing = true;
+		showMessage( "Resizing..." );
+	}
+
+	resizeTimer = setTimeout( resize, 200 );
+}
+
+function start()
+{
+	var d = document;
+
+	d.onkeydown = keyDown;
+	d.onkeyup = keyUp;
+
+	enablePointer();
+	hideMessage();
+
+	running = true;
+	run();
+}
+
+function createFragments()
+{
+	var rect = resources.ghost0.rect,
+		w2 = rect.w >> 1,
+		h2 = rect.h >> 1,
+		offset = rect.y*(atlasWidth << 2)+(rect.x << 2),
+		skip = (atlasWidth-rect.w) << 2;
+
+	fragmentsLength = 0;
+
+	for( var y = 0, h = rect.h; y < h; ++y, offset += skip )
+		for( var x = 0, w = rect.w; x < w; ++x )
+		{
+			var r = atlas[offset++],
+				g = atlas[offset++],
+				b = atlas[offset++],
+				a = atlas[offset++];
+
+			if( a == 0 )
+				continue;
+
+			var cx = x-w2,
+				cy = y-h2,
+				alpha = Math.atan2( cy, cx ),
+				vx = Math.cos( alpha ),
+				vy = Math.sin( alpha );
+
+			fragments[fragmentsLength++] = {
+				color: 'rgba('+r+','+g+','+b+','+(a/255)+')',
+				ox: cx,
+				oy: cy,
+				ovx: vx,
+				ovy: vy };
+		}
+}
+
+function decompressAtlas()
+{
+	var c = document.createElement( "canvas" ),
+		x = c.getContext( "2d" ),
+		w = atlas.width,
+		h = atlas.height;
+
+	c.width = w;
+	c.height = h;
+	x.drawImage( atlas, 0, 0 );
+
+	atlas = x.getImageData( 0, 0, w, h ).data;
+	atlasWidth = w;
+}
+
+function init()
+{
+	if( !atlas.complete ||
+		new Date().getTime()-last < 500 )
+	{
+		// give mobile browsers some time to settle
+		// their window.innerWidth/Height values, i.e.
+		// there may still be the virtual keyboard visible
+		setTimeout( init, 500 );
+		return;
+	}
+
+	decompressAtlas();
+	createFragments();
+
+	document.body.appendChild( canvas );
+
+	resize();
+	window.onresize = scheduleResize;
+
+	start();
+}
+
+function indexSounds()
+{
+	var audios = document.getElementsByTagName( "audio" );
+
+	if( !audios ||
+		!audios.length )
+		return;
+
+	for( var n = audioChannelsLength; n--; )
+		audioChannels[n] = {
+			channel: new Audio(),
+			finished: 0 };
+
+	for( var n = audios.length; n--; )
+	{
+		var e = audios[n];
+
+		sounds[e.id] = e;
+	}
+}
+
+function createCanvas()
+{
+	if( !(canvas = document.createElement( "canvas" )) ||
+		!(ctx = canvas.getContext( "2d", { alpha: false } )) )
+		return false;
+
+	ratio =
+		(window.devicePixelRatio || 1)/
+		(ctx.webkitBackingStorePixelRatio ||
+			ctx.mozBackingStorePixelRatio ||
+			ctx.msBackingStorePixelRatio ||
+			ctx.oBackingStorePixelRatio ||
+			ctx.backingStorePixelRatio ||
+			1);
+
+	return true;
+}
+
+function load()
+{
+	if( !(message = document.getElementById( "Message" )) ||
+		!(messageText = document.getElementById( "MessageText" )) ||
+		!createCanvas() )
+	{
+		setMessage( "Sorry, this browser cannot run this game." );
+
+		return;
+	}
+
+	setMessage( "Loading..." );
+	indexSounds();
+
+	last = new Date().getTime();
+
+	atlas = new Image();
+	atlas.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAAuCAMAAABgZ9sFAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAilBMVEUAAAD///+JS0uQVFT///////9AQECAgID7+/ugoKCenp6ISkr+/v78/Pz///+fn5/9/f2QkJD7+/t/f3+AgIBqLy+haGjv7+/+/v5wcHACAACiaWkBAAD///+MT0+QVFSPU1OJS0uISkpAQECgoKDf39+enp6fn5/9/f2JTEz7+vr8/PyIS0v8+/tt8CM3AAAAEXRSTlMAGf39Iv39/f39/f39/TD9/RE4b5AAAAABYktHRAH/Ai3eAAACkElEQVRIx4WVi3abMAxAZVaSsHXrTLyC27ppZ8Dpsv3/702y5AchO3NPcoS5KMK+VgEAtNaQhsQ9fR3TvFIqA2B+MNOXuO/x4tg8Cj2MQ+Ht0/NTQiSOj9rm5VFoV/H20/NrRuq44fR3DvDvLuOn11NGTm8xfo/4T04e8Zze4sgIx7rn2EBLOI1RJdroOPoS07y3k9GtaxkfKtykpazjHeGUfXRUi+AWEDF6E3vIOBU/FxyZ/SZG3EzT1CA+4zqm2t8JsftN3IDRxnAxg5vXK2NuxFobyws5O7XC4/xVPGFywVEZV3ZVPut4kjfwoAgttE1fq3hKfIXKOBaDS7jRN01kU+uw0pdfM08kU1dh0ZcUUITLrWTqKtzoe0y3xNR1uNH3mG7x1rRJTzjIJG2vivYSbmT1dlYv6JIj3gatDwfkQyAFVjjuG9EQ8Zjd20VzdqIZp2oc7pQ8j7gRHC0UPGCOCh8IZ7V3gHmmDlVlfPncEK7P2viGihkc4/G8fUH1oktcDNV1gPvm/nw+6+QjPqC+fmBn+QXQdUHvs2ImCUnZCSd5Z5KMTzN0cXUqxz0fbDmzyqE0jl4+6sZjJ3wQCb1cBfaRcZktFoaY2PMnXYvCIVxbmKduCryxcCX+tcAFT3eq38m+fksC37LwpTooN/tvdm8tfvL1uv8CLEH6XC0++bpPhykqJuOBum7+nZxjqQUeMv4AdtTjron4ZKSFLZAFpv5bikFcjyk799yWcFP5Xi/lA9JjwrWcE8QvxnjfKPa31A6/8/9VbNGc/c/H98vlEgV286r/QotVhk5wG3htvDcXvURcza1qq20iGQW3qSzP7xvtUgNc0XhGOOxqmZal+FjwXf3kiv/PqJ78x/gLGrlMh4WiHksAAAAASUVORK5CYII=";
+	atlas.onload = init;
+}
+
+window.onload = load;
+
+</script>
+</body>
+</html>
