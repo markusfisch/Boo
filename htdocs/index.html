@@ -59,19 +59,18 @@ canvas
 .Button
 {
 	margin: 0 auto; padding: 0;
-	font-weight: lighter;
+	font-weight: bolder;
 	letter-spacing: .2em;
 	line-height: 150%;
-	font-variant: small-caps;
+	text-transform: uppercase;
 }
 
 .Button
 {
-	background: #333; color: #fff;
+	background: #fff; color: #111;
 	display: inline-block;
-	margin: .25em; padding: .4em 1.5em;
+	margin: .25em; padding: .4em 2em;
 	border: 0; outline: 0;
-	border-radius: .2em;
 	text-decoration: none;
 	cursor: default;
 }
@@ -111,16 +110,16 @@ var requestAnimFrame =
 	resources = {
 		ground: { rect: {/*ground*/x:0,y:0,w:32,h:32} },
 		ghost0: { rect: {/*ghost0*/x:72,y:14,w:10,h:14} },
-		ghost1: { rect: {/*ghost1*/x:82,y:14,w:9,h:14} },
+		ghost1: { rect: {/*ghost1*/x:64,y:16,w:8,h:14} },
 		ghost2: { rect: {/*ghost2*/x:91,y:0,w:7,h:14} },
 		ghost3: { rect: {/*ghost3*/x:82,y:0,w:9,h:14} },
 		ghost4: { rect: {/*ghost2*/x:91,y:0,w:7,h:14} },
-		ghost5: { rect: {/*ghost1*/x:82,y:14,w:9,h:14} },
+		ghost5: { rect: {/*ghost1*/x:64,y:16,w:8,h:14} },
 		priestCrow0: { rect: {/*priest-crow0*/x:32,y:15,w:12,h:15} },
 		priestCrow1: { rect: {/*priest-crow1*/x:32,y:0,w:12,h:15} },
 		priestWalkRight0: { rect: {/*priest-walk0*/x:44,y:16,w:9,h:15} },
 		priestWalkRight1: { rect: {/*priest-walk1*/x:53,y:0,w:11,h:14} },
-		priestWalkRight2: { rect: {/*priest-walk2*/x:64,y:16,w:8,h:15} },
+		priestWalkRight2: { rect: {/*priest-walk2*/x:82,y:14,w:8,h:15} },
 		priestWalkRight3: { rect: {/*priest-walk3*/x:64,y:0,w:8,h:16} },
 		priestWalkRight4: { rect: {/*priest-walk4*/x:53,y:14,w:10,h:15} },
 		priestWalkRight5: { rect: {/*priest-walk5*/x:72,y:0,w:10,h:14} },
@@ -130,7 +129,7 @@ var requestAnimFrame =
 			mirror: true },
 		priestWalkLeft1: { rect: {/*priest-walk1*/x:53,y:0,w:11,h:14},
 			mirror: true },
-		priestWalkLeft2: { rect: {/*priest-walk2*/x:64,y:16,w:8,h:15},
+		priestWalkLeft2: { rect: {/*priest-walk2*/x:82,y:14,w:8,h:15},
 			mirror: true },
 		priestWalkLeft3: { rect: {/*priest-walk3*/x:64,y:0,w:8,h:16},
 			mirror: true },
@@ -186,8 +185,8 @@ var requestAnimFrame =
 	playerFrame,
 	playerFrameLast,
 	playerAlive,
-	playerSurvived,
-	playerSurvivedLast,
+	scores,
+	scoreLast,
 	fragmentsLength,
 	fragments = [];
 
@@ -242,10 +241,12 @@ function drawPlayer()
 		playerFrameLast = now;
 	}
 
+	ctxGame.globalAlpha = pointerLength ? 1 : .3;
 	drawSprite(
 		sprites[state+playerFrame],
 		playerX,
 		playerY+Math.sin( now*.002 )*scaleFactor );
+	ctxGame.globalAlpha = 1;
 }
 
 function bounce( value, change, min, max )
@@ -300,7 +301,7 @@ function killPlayer()
 		function()
 		{
 			showMessage(
-				'You survived '+playerSurvived+' seconds!'+
+				'You made '+scores+' scores!'+
 				'<div class="Buttons">'+
 				'<a onclick="restart()" class="Button">Try again</a>'+
 				'</div>' );
@@ -355,9 +356,12 @@ function drawPriestWalking( p )
 			(d = Math.sqrt( d )) < radiusCastOut )
 			killPlayer();
 
-		d /= scaleFactor;
-		p.vx = dx/d;
-		p.vy = dy/d;
+		if( pointerLength )
+		{
+			d /= scaleFactor;
+			p.vx = dx/d;
+			p.vy = dy/d;
+		}
 	}
 
 	if( now-p.lastFrame > frameFrequency )
@@ -468,7 +472,7 @@ function reset()
 	playerY = centerY;
 	playerAlive = true;
 	playerFrameLast = playerFrame = 0;
-	playerSurvivedLast = playerSurvived = 0;
+	scoreLast = scores = 0;
 
 	priestsLength = 16;
 
@@ -527,10 +531,11 @@ function run()
 	last = now;
 
 	if( playerAlive &&
-		now-playerSurvivedLast > 1000 )
+		pointerLength &&
+		now-scoreLast > 100 )
 	{
-		++playerSurvived;
-		playerSurvivedLast = now;
+		++scores;
+		scoreLast = now;
 	}
 
 	input();
@@ -940,7 +945,7 @@ function load()
 	last = new Date().getTime();
 
 	atlas = new Image();
-	atlas.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGIAAAAgCAMAAADe611bAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAACQUExURQAAAAsLC4lLS5BUVPv7+////4CAgEBAQJ+fn56enqCgoIhKSv39/f7+/vz8/CAgIBUVFQsLC5CQkH9/f+/v7////xYWFoCAgGovL/v7+6FoaHBwcAIAAKJpaQEAAIxPT5BUVIhKSolLS5+fn56enkBAQM/Pz/7+/qCgoPz8/Pz7+4lMTIhLS49TU/39/fv6+nRhzkcAAAAPdFJOUwD9/f39/f39/f39/f39/W3sy9EAAAABYktHRAX4b+nHAAAAB3RJTUUH3gsLFBINWVtmLQAABGlJREFUSMelVmt32zYMBbU4arO1fFgmm6lt0spW5LXz/v+/Ky4AUrLTs34ok4gQj3Iv8eAFyfkQQwgu8BTZcphidFjhN0dEKSWqY9/sn1jr0nAY1olhPGN5UPDT5Rg8U3nn+C0HpigflOMRIN3fFfe1tS4NhwPAbcrRCxb/8v49dh/FryDETDF+/PSRKR4fmWPsPhvMT6x9WzrgZxh0IhcVK2PmADkfxSWLHij++PRUvRi7rgG/svbVUGweMlHwOQSjATAos4dDvJJ9YIjnp+eV4gtV4FfWvhoI0DoohyxRysITkQFxR0kyKHiA4ivgxpLoToDZJNqpdS/IpRpKUYkoRh/VhaAllKOUloSL/wRVhngxpXR3xxz9mI6JdgfmOE5FCul4TKVUCg7QYBNhx3BDnqCI3pyQrHtQlFq2p/GYxIuehAJevMEWwEDMsKEYhrlRaIywa85BxgHxGieOoA8jMUUxBtpQFKV4Q+NLeuk7pigbCkDPUrRMgXhkrSdxI0rohASFMIob9yvF8W0HCoZbHpYOFOlFvSjnUk6nzs7DLDP7QkELVPLhmIsrSk4IJx7s+SsoLI0cKITnjv4kRGXUQDHDC9E/3/46n8/q7azQNAwyMY7sVjfNBRX1xeNU8ItWVKkFKsBEDw9Tuh917btm6nQq53QUBoOGMfNspcRnWlFNo9oh1/I0NJarMp5AgZdelnbsz/SAKEq0gMywsyZlpkZh5SNlqkcww4igOJH9P49pY1OvHH2llMKt6BoxeUrRivTVoxHrU0LGAZAoNIZqV1ntNXBNXWlj6Td6lH3FFkVUeMl6WMWcj940rapeJcp8qbK6teybDEFyQAaP49ONI+ijpgQUJuaitGtLWPXVVkxWqwhupJdzHF0NjYdIqcpKeqJolIr5Tb+o+rq/VldwNTKTXqlMyKsKiAQrqrjDiXwr5muX+HLljUre0KzDKr1Bw5KtnFzNs/VZEfN/n5vSrl3CZLWumLrOzVLpFYomtNHkFtIUYwyNQsU8XfWLaTJZrSumeQMOnKofUywJ3yiaxkg6XbQgIe0sWE3M696LNImpyuo4jtSScWj5FsO2Ea1J+1gt+MGtMMsRdzdivpSEJjGx+BnFspVXQZ6rDE4q0bFqLHKrAbNG7vmycC3m3IiYAl5MlC6pQFVtZafA9W6jIZu0j6FFIx3eqJgmVzFkub0VcwV81727XC5JvUjamlp7EAtK+P4bn6X/+OjhftC6BXq491q2UmZxK+ZMUZaFmwSO/CVpoDin4oVyiLRCxed5IOvGpoJZmh1zOL1SeWl90fmtmHdUkIGddg7ND/NP9S4yVwWcpbI4nCJngPQ+1LICPvsVRWWdk3vUjZhTU9sJaR/RkK6ltc6Tfsj7Fiey6DfXUAaydCju3t5difmSrCWtyts3IX89TDWj9bw2fJZUZ82/24r5Yhk5bWB6+h8OHVnLyNkdzbUOhUbOHm6/XSrHlqKnXw2nB5tFXC5/woGbuRdDLv+/OX4A0ruUGIlh9NsAAAAASUVORK5CYII=";
+	atlas.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGIAAAAgCAMAAADe611bAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAkFBMVEUAAAALCwuJS0uQVFT7+/v///+AgIBAQECfn5+enp6goKCISkr9/f3+/v78/PwgICAVFRULCwuQkJB/f3/v7+////8WFhaAgIBqLy/7+/uhaGhwcHACAACiaWkBAACMT0+QVFSISkqJS0ufn5+enp5AQEDPz8/+/v6goKD8/Pz8+/uJTEyIS0uPU1P9/f37+vp0Yc5HAAAAD3RSTlMA/f39/f39/f39/f39/f1t7MvRAAAAAWJLR0QF+G/pxwAABGRJREFUSMelloty2zYQRResbaVuUjxMAXWZNE4oUVTTKP//d737IinZk5lOmVhY0vJe7ANnSSGmnFIKCUuGFXjJOfAT3AUiKqWQX0+L/Ya1Pur3/brATYSvyBL4DDWnCKkYAu5qgkT7QzWe2Un3p/t9ba2P+v2endtScxRf+I/9R959lriSCENi+PjpIySen6ExdH+Zmzesp+XRnv/1vS4UsvqqvCJBIWYJybLHEr98+uxRDF23OH5lPbmhvnHJQinWlEyGHbNkjRwQntSY4OLl88sq8YXc8SvryQ1O0HpRTVWyVEUncwUkHBWpLIGLJb6yu6EVuhPHMInu1XoQz80NlXAhyjlmDSFpC9UsrSXpwo94lUuiGEu5u4PGbiiHQvd7aBzGJo10OJTWXAIJ6m0h3jGHIZ8skaMFIVWPLNG8bY/DoUgUOxIJjuIdb4EVCAobib6fFgnNEe8aNah8QKLmCRmMaSBINFOgjURTiXc0nMpp10GibSTY9SRNCwnOR9V+kjCypE5EuBEGCeNhlTj82rEE3M2Pc8cS5aRRtHNrx2Nn52GSFbFQ0gaVegRooaPkhKDwrF6/soSVEYni9NzRb8RZGTRRUDgR/f3t/fl81mgndU19Lwv8yG5102iorDeRTwVutKOaN6g4Jnp8HMvDoM/+0Uodj+1cDqJgrtmYsFor4UyrV2PUcsi1Pc0bcNWGI0vwzU4e3SOe8ZGzKNliz3A7aVEmWiSsfaRN9QhWNjJLHMn+Hte4sWmnGjuXlMZ175ox+ZSmFfT50cj+KSlDAiQLi4LbjtWdJm6h62sG61GO7luIqO6l6mmFOY7eOK5Ud0RZLI7VNxhcGUiBPbNOwOnmIxizloQlDOZC2nWHK2lt94bV7W8MvahxDp6ayJBSykp5sjBKYX4zL4YVqzYbFKtbBht6pTMZrwoQSVZWuHMQ9Rbm65T4sgE3kSKvv2KwoTdpWqq1U/A625wVmH9/WUi7TgnD6t4SZHSd5Dcm0dRKC2iz4ZbRlHNOi4TCvFzNi3E0rDqxjXkIY5gNVdTmwpZ60xzJpMuWJC47gLXA3PfeZEiMjtXeE9TLoFMJYJ6/ZdvINqRjdovjwCiscsTDDczx5zwkRsBPJaZeib1qDXNRzNOoiM7OWK6tJswGecTLwjXMMYh0h5Aol9KYquQSU+8SyI9HIdnlEc3liCYFmeowBG5vYa4SH7oPl8vFsOpnzscDiDZKxX7/hrP0A0eP3w+WacEzPEZtW2mzvIX5kXc4z50A8VLazbFmDaAVzXFyaEoURsEqww4aQV+pooy+HOIW5h01rsC9Tg4/5/Cs7BbEMrQciqMik13GmLyt2D/iykLZEOQ96gbmtNB2VC7aWHC07hbwjvpF7FuCqMJv9FBlzzKhML1juIL5XGwkbcm7mQ9XXFyomW3mLVesUuqq9Q9bmM9WkSNdXxP99KraRsHe0cIyoXiQI8Ltd2fX+G9X0IMNiMvLn2jwm3kUQ17+/+f1L8dbk9glAPZXAAAAAElFTkSuQmCC";
 	atlas.onload = init;
 }
 
