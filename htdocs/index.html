@@ -46,81 +46,90 @@ var requestAnimFrame =
 			window.setTimeout( callback, 16 );
 		},
 	resources = {
-		0: { rect: {/*0*/x:125,y:20,w:3,h:5} },
-		1: { rect: {/*1*/x:114,y:25,w:2,h:5} },
-		2: { rect: {/*2*/x:125,y:15,w:3,h:5} },
-		3: { rect: {/*3*/x:125,y:10,w:3,h:5} },
-		4: { rect: {/*4*/x:125,y:5,w:3,h:5} },
-		5: { rect: {/*5*/x:125,y:0,w:3,h:5} },
-		6: { rect: {/*6*/x:122,y:25,w:3,h:5} },
-		7: { rect: {/*7*/x:122,y:20,w:3,h:5} },
-		8: { rect: {/*8*/x:122,y:15,w:3,h:5} },
-		9: { rect: {/*9*/x:122,y:10,w:3,h:5} },
-		a: { rect: {/*a*/x:122,y:5,w:3,h:5} },
-		b: { rect: {/*b*/x:122,y:0,w:3,h:5} },
-		c: { rect: {/*c*/x:119,y:25,w:3,h:5} },
-		d: { rect: {/*d*/x:119,y:20,w:3,h:5} },
-		e: { rect: {/*e*/x:119,y:15,w:3,h:5} },
-		f: { rect: {/*f*/x:119,y:10,w:3,h:5} },
-		g: { rect: {/*g*/x:119,y:5,w:3,h:5} },
-		h: { rect: {/*h*/x:119,y:0,w:3,h:5} },
-		i: { rect: {/*i*/x:116,y:25,w:3,h:5} },
-		j: { rect: {/*j*/x:125,y:25,w:2,h:5} },
-		k: { rect: {/*k*/x:116,y:20,w:3,h:5} },
-		l: { rect: {/*l*/x:116,y:15,w:3,h:5} },
-		m: { rect: {/*m*/x:111,y:5,w:5,h:5} },
-		n: { rect: {/*n*/x:111,y:20,w:4,h:5} },
-		o: { rect: {/*o*/x:116,y:10,w:3,h:5} },
-		p: { rect: {/*p*/x:116,y:5,w:3,h:5} },
-		q: { rect: {/*q*/x:111,y:15,w:4,h:5} },
-		r: { rect: {/*r*/x:54,y:25,w:3,h:5} },
-		s: { rect: {/*s*/x:54,y:20,w:3,h:5} },
-		t: { rect: {/*t*/x:54,y:15,w:3,h:5} },
-		u: { rect: {/*u*/x:111,y:25,w:3,h:5} },
-		v: { rect: {/*v*/x:111,y:0,w:5,h:5} },
-		w: { rect: {/*w*/x:105,y:25,w:5,h:5} },
-		x: { rect: {/*x*/x:105,y:20,w:5,h:5} },
-		y: { rect: {/*y*/x:105,y:15,w:5,h:5} },
-		z: { rect: {/*z*/x:111,y:10,w:4,h:5} },
-		".": { rect: {/*point*/x:126,y:30,w:1,h:1} },
-		":": { rect: {/*colon*/x:115,y:10,w:1,h:3} },
-		",": { rect: {/*comma*/x:125,y:30,w:1,h:2} },
-		"!": { rect: {/*exclamation*/x:127,y:25,w:1,h:5} },
-		"?": { rect: {/*question*/x:116,y:0,w:3,h:5} },
-		ground: { rect: {/*ground*/x:0,y:0,w:32,h:32} },
-		ghost0: { rect: {/*ghost0*/x:78,y:14,w:10,h:14} },
-		ghost1: { rect: {/*ghost1*/x:97,y:0,w:8,h:14} },
-		ghost2: { rect: {/*ghost2*/x:97,y:14,w:7,h:14} },
-		ghost3: { rect: {/*ghost3*/x:88,y:0,w:9,h:14} },
-		ghost4: { rect: {/*ghost2*/x:97,y:14,w:7,h:14} },
-		ghost5: { rect: {/*ghost1*/x:97,y:0,w:8,h:14} },
-		priestCrow0: { rect: {/*priest-crow0*/x:45,y:0,w:13,h:15} },
-		priestCrow1: { rect: {/*priest-crow1*/x:32,y:15,w:13,h:15} },
-		priestCrow2: { rect: {/*priest-crow2*/x:32,y:0,w:13,h:15} },
-		priestCrow3: { rect: {/*priest-crow1*/x:32,y:15,w:13,h:15} },
-		priestWalkRight0: { rect: {/*priest-walk0*/x:69,y:0,w:9,h:15} },
-		priestWalkRight1: { rect: {/*priest-walk1*/x:58,y:0,w:11,h:14} },
-		priestWalkRight2: { rect: {/*priest-walk2*/x:88,y:14,w:8,h:15} },
-		priestWalkRight3: { rect: {/*priest-walk3*/x:69,y:15,w:8,h:16} },
-		priestWalkRight4: { rect: {/*priest-walk4*/x:58,y:14,w:10,h:15} },
-		priestWalkRight5: { rect: {/*priest-walk5*/x:78,y:0,w:10,h:14} },
-		priestWalkRight6: { rect: {/*priest-walk6*/x:105,y:0,w:6,h:15} },
-		priestWalkRight7: { rect: {/*priest-walk7*/x:45,y:15,w:9,h:16} },
-		priestWalkLeft0: { rect: {/*priest-walk0*/x:69,y:0,w:9,h:15},
+		0: { rect: {/*0*/x:367,y:0,w:3,h:6} },
+		1: { rect: {/*1*/x:370,y:0,w:2,h:6} },
+		2: { rect: {/*2*/x:364,y:6,w:3,h:6} },
+		3: { rect: {/*3*/x:364,y:0,w:3,h:6} },
+		4: { rect: {/*4*/x:361,y:6,w:3,h:6} },
+		5: { rect: {/*5*/x:361,y:0,w:3,h:6} },
+		6: { rect: {/*6*/x:358,y:6,w:3,h:6} },
+		7: { rect: {/*7*/x:358,y:0,w:3,h:6} },
+		8: { rect: {/*8*/x:355,y:6,w:3,h:6} },
+		9: { rect: {/*9*/x:355,y:0,w:3,h:6} },
+		a: { rect: {/*a*/x:352,y:6,w:3,h:6} },
+		b: { rect: {/*b*/x:352,y:0,w:3,h:6} },
+		c: { rect: {/*c*/x:349,y:6,w:3,h:6} },
+		d: { rect: {/*d*/x:349,y:0,w:3,h:6} },
+		e: { rect: {/*e*/x:346,y:6,w:3,h:6} },
+		f: { rect: {/*f*/x:346,y:0,w:3,h:6} },
+		g: { rect: {/*g*/x:343,y:6,w:3,h:6} },
+		h: { rect: {/*h*/x:343,y:0,w:3,h:6} },
+		i: { rect: {/*i*/x:340,y:6,w:3,h:6} },
+		j: { rect: {/*j*/x:367,y:6,w:2,h:6} },
+		k: { rect: {/*k*/x:340,y:0,w:3,h:6} },
+		l: { rect: {/*l*/x:337,y:6,w:3,h:6} },
+		m: { rect: {/*m*/x:319,y:0,w:5,h:6} },
+		n: { rect: {/*n*/x:324,y:6,w:4,h:6} },
+		o: { rect: {/*o*/x:337,y:0,w:3,h:6} },
+		p: { rect: {/*p*/x:334,y:6,w:3,h:6} },
+		q: { rect: {/*q*/x:324,y:0,w:4,h:6} },
+		r: { rect: {/*r*/x:331,y:6,w:3,h:6} },
+		s: { rect: {/*s*/x:331,y:0,w:3,h:6} },
+		t: { rect: {/*t*/x:328,y:6,w:3,h:6} },
+		u: { rect: {/*u*/x:328,y:0,w:3,h:6} },
+		v: { rect: {/*v*/x:314,y:6,w:5,h:6} },
+		w: { rect: {/*w*/x:314,y:0,w:5,h:6} },
+		x: { rect: {/*x*/x:309,y:6,w:5,h:6} },
+		y: { rect: {/*y*/x:309,y:0,w:5,h:6} },
+		z: { rect: {/*z*/x:319,y:6,w:4,h:6} },
+		".": { rect: {/*point*/x:371,y:10,w:1,h:2} },
+		":": { rect: {/*colon*/x:371,y:6,w:1,h:4} },
+		",": { rect: {/*comma*/x:370,y:12,w:1,h:3} },
+		"!": { rect: {/*exclamation*/x:370,y:6,w:1,h:6} },
+		"?": { rect: {/*question*/x:334,y:0,w:3,h:6} },
+		ground: { rect: {/*ground*/x:144,y:0,w:16,h:16} },
+		yardTopLeft: { rect: {/*yard-top-left*/x:32,y:0,w:16,h:16} },
+		yardTop: { rect: {/*yard-top*/x:0,y:0,w:16,h:16} },
+		yardTopRight: { rect: {/*yard-top-right*/x:16,y:0,w:16,h:16} },
+		yardLeft: { rect: {/*yard-left*/x:80,y:0,w:16,h:16} },
+		yardMiddle: { rect: {/*yard-middle*/x:64,y:0,w:16,h:16} },
+		yardRight: { rect: {/*yard-right*/x:48,y:0,w:16,h:16} },
+		yardBottomLeft: { rect: {/*yard-bottom-left*/x:128,y:0,w:16,h:16} },
+		yardBottom: { rect: {/*yard-bottom*/x:96,y:0,w:16,h:16} },
+		yardBottomRight: { rect: {/*yard-bottom-right*/x:112,y:0,w:16,h:16} },
+		ghost0: { rect: {/*ghost0*/x:160,y:0,w:12,h:16} },
+		ghost1: { rect: {/*ghost1*/x:219,y:0,w:10,h:16} },
+		ghost2: { rect: {/*ghost2*/x:238,y:0,w:9,h:16} },
+		ghost3: { rect: {/*ghost3*/x:208,y:0,w:11,h:16} },
+		ghost4: { rect: {/*ghost2*/x:238,y:0,w:9,h:16} },
+		ghost5: { rect: {/*ghost1*/x:219,y:0,w:10,h:16} },
+		priestCrow0: { rect: {/*priest-crow0*/x:196,y:0,w:12,h:15} },
+		priestCrow1: { rect: {/*priest-crow1*/x:184,y:0,w:12,h:15} },
+		priestCrow2: { rect: {/*priest-crow2*/x:172,y:0,w:12,h:15} },
+		priestCrow3: { rect: {/*priest-crow1*/x:184,y:0,w:12,h:15} },
+		priestWalkRight0: { rect: {/*priest-walk0*/x:268,y:0,w:9,h:15} },
+		priestWalkRight1: { rect: {/*priest-walk1*/x:247,y:0,w:11,h:14} },
+		priestWalkRight2: { rect: {/*priest-walk2*/x:295,y:0,w:8,h:15} },
+		priestWalkRight3: { rect: {/*priest-walk3*/x:277,y:0,w:8,h:16} },
+		priestWalkRight4: { rect: {/*priest-walk4*/x:258,y:0,w:10,h:15} },
+		priestWalkRight5: { rect: {/*priest-walk5*/x:285,y:0,w:10,h:14} },
+		priestWalkRight6: { rect: {/*priest-walk6*/x:303,y:0,w:6,h:15} },
+		priestWalkRight7: { rect: {/*priest-walk7*/x:229,y:0,w:9,h:16} },
+		priestWalkLeft0: { rect: {/*priest-walk0*/x:268,y:0,w:9,h:15},
 			mirror: true },
-		priestWalkLeft1: { rect: {/*priest-walk1*/x:58,y:0,w:11,h:14},
+		priestWalkLeft1: { rect: {/*priest-walk1*/x:247,y:0,w:11,h:14},
 			mirror: true },
-		priestWalkLeft2: { rect: {/*priest-walk2*/x:88,y:14,w:8,h:15},
+		priestWalkLeft2: { rect: {/*priest-walk2*/x:295,y:0,w:8,h:15},
 			mirror: true },
-		priestWalkLeft3: { rect: {/*priest-walk3*/x:69,y:15,w:8,h:16},
+		priestWalkLeft3: { rect: {/*priest-walk3*/x:277,y:0,w:8,h:16},
 			mirror: true },
-		priestWalkLeft4: { rect: {/*priest-walk4*/x:58,y:14,w:10,h:15},
+		priestWalkLeft4: { rect: {/*priest-walk4*/x:258,y:0,w:10,h:15},
 			mirror: true },
-		priestWalkLeft5: { rect: {/*priest-walk5*/x:78,y:0,w:10,h:14},
+		priestWalkLeft5: { rect: {/*priest-walk5*/x:285,y:0,w:10,h:14},
 			mirror: true },
-		priestWalkLeft6: { rect: {/*priest-walk6*/x:105,y:0,w:6,h:15},
+		priestWalkLeft6: { rect: {/*priest-walk6*/x:303,y:0,w:6,h:15},
 			mirror: true },
-		priestWalkLeft7: { rect: {/*priest-walk7*/x:45,y:15,w:9,h:16},
+		priestWalkLeft7: { rect: {/*priest-walk7*/x:229,y:0,w:9,h:16},
 			mirror: true },
 	},
 	atlas,
@@ -230,7 +239,7 @@ function drawFragments()
 
 		f.x += f.vx*factor;
 		f.y += f.vy*factor;
-		f.spin += factor*.1;
+		f.spin += factor*.025;
 		++f.live;
 
 		var a = 1.05;
@@ -340,7 +349,7 @@ function drawPriestCrowing( p )
 	if( now-p.lastFrame > frameFrequency )
 	{
 		++p.frame;
-		p.frame %= 2;
+		p.frame %= 4;
 		p.lastFrame = now;
 	}
 
@@ -514,22 +523,58 @@ function drawBackground()
 {
 	ctxBack.clearRect( 0, 0, width, height );
 
-	var sprite = sprites.ground;
+	var sprite = sprites.ground,
+		w = sprite.width,
+		h = sprite.height;
 
-	for( var y = 0, h = sprite.height; y < height; y += h )
-		for( var x = 0, w = sprite.width; x < width; x += w )
+	for( var y = 0; y < height; y += h )
+		for( var x = 0; x < width; x += w )
 			ctxBack.drawImage(
 				sprite,
 				x,
 				y );
 
-	ctxBack.globalAlpha = .5;
-	ctxBack.strokeStyle = "#888";
-	ctxBack.strokeRect( mapLeft, mapTop, mapRight-mapLeft, mapBottom-mapTop );
+	var mw = mapRight-mapLeft,
+		mh = mapBottom-mapTop,
+		cols = mw/w | 0,
+		rows = mh/h | 0,
+		map = [],
+		o = 0;
 
-	ctxBack.fillStyle = "#222";
-	ctxBack.fillRect( mapLeft, mapTop, mapRight-mapLeft, mapBottom-mapTop );
-	ctxBack.globalAlpha = 1;
+	map[o++] = "yardTopLeft";
+
+	for( var x = cols; x--; )
+		map[o++] = "yardTop";
+
+	map[o++] = "yardTopRight";
+
+	for( var y = rows; y--; )
+	{
+		map[o++] = "yardLeft";
+
+		for( var n = cols; n--; )
+			map[o++] = "yardMiddle";
+
+		map[o++] = "yardRight";
+	}
+
+	map[o++] = "yardBottomLeft";
+
+	for( var x = cols; x--; )
+		map[o++] = "yardBottom";
+
+	map[o++] = "yardBottomRight";
+
+	o = 0;
+	mh += mapTop+h;
+	mw += mapLeft+w;
+
+	for( var y = mapTop-h; y < mh; y += h )
+		for( var x = mapLeft-w; x < mw; x += w )
+			ctxBack.drawImage(
+				sprites[map[o++]],
+				x,
+				y );
 }
 
 function updateScore()
@@ -721,7 +766,9 @@ function scaleSprite( res, rect, w, h )
 
 function scale( min )
 {
-	scaleFactor = Math.round( min/16/resources.ghost0.rect.h );
+	scaleFactor = Math.max(
+		1,
+		Math.floor( min/16/resources.ghost0.rect.h ) );
 
 	for( var name in resources )
 	{
@@ -942,7 +989,7 @@ function load()
 	last = new Date().getTime();
 
 	atlas = new Image();
-	atlas.src = "data:image/png;base64,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";
+	atlas.src = "data:image/png;base64,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";
 	atlas.onload = init;
 }
 
