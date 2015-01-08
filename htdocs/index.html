@@ -12,8 +12,8 @@
 html,
 body
 {
-	background: #111;
 	margin: 0; padding: 0;
+	background: #111;
 	overflow: hidden;
 	-ms-touch-action: none;
 }
@@ -765,7 +765,7 @@ function pointerDown( ev )
 function scaleSprite( res, rect, w, h )
 {
 	var c = document.createElement( "canvas" ),
-		x = c.getContext( "2d" );
+		cx = c.getContext( "2d" );
 
 	c.width = w;
 	c.height = h;
@@ -787,6 +787,10 @@ function scaleSprite( res, rect, w, h )
 	for( var ay = rect.h, sy = 0;
 		ay--;
 		offset += skip, sy += scaleFactor )
+	{
+		var y = Math.ceil( sy ),
+			h = Math.ceil( sy+scaleFactor )-y;
+
 		for( var ax = rect.w, sx = xs;
 			ax--;
 			sx += xf )
@@ -799,13 +803,16 @@ function scaleSprite( res, rect, w, h )
 			if( a == 0 )
 				continue;
 
-			x.fillStyle = 'rgba('+r+','+g+','+b+','+(a/255)+')';
-			x.fillRect(
-				Math.ceil( sx ),
-				Math.ceil( sy ),
-				Math.ceil( scaleFactor ),
-				Math.ceil( scaleFactor ) );
+			var x = Math.ceil( sx );
+
+			cx.fillStyle = 'rgba('+r+','+g+','+b+','+(a/255)+')';
+			cx.fillRect(
+				x,
+				y,
+				Math.ceil( sx+Math.abs( xf ) )-x,
+				h );
 		}
+	}
 
 	return c;
 }
@@ -816,8 +823,8 @@ function scale()
 	{
 		var res = resources[name],
 			rc = res.rect,
-			w = Math.max( rc.w*scaleFactor | 0, 1 ),
-			h = Math.max( rc.h*scaleFactor | 0, 1 );
+			w = Math.max( Math.ceil( rc.w*scaleFactor ), 1 ),
+			h = Math.max( Math.ceil( rc.h*scaleFactor ), 1 );
 
 		sprites[name] = scaleSprite( res, rc, w, h );
 	}
