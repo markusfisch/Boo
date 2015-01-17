@@ -9,7 +9,9 @@ OPTIONS = \
 	--times \
 	--compress
 
-live: atlas
+all: atlas live
+
+live:
 	rsync $(OPTIONS) \
 		$(HTDOCS)/* \
 		$(WEBROOT)
