@@ -676,6 +676,8 @@ function input()
 
 function run()
 {
+	requestAnimFrame( run );
+
 	now = new Date().getTime();
 	factor = (now-last)/16;
 	last = now;
@@ -691,8 +693,6 @@ function run()
 
 	input();
 	draw();
-
-	requestAnimFrame( run );
 }
 
 function setPointers( ev, down )
