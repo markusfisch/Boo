@@ -1,4 +1,4 @@
 Boo!
 ====
 
-People don't like what they don't understand.
+You're a ghost trying to escape the priests.
