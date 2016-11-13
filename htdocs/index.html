@@ -181,11 +181,12 @@ var requestAnimFrame =
 	gameOver,
 	frameFrequency = 100,
 	seed,
-	priestsLength,
-	priests = [],
+	objectsLength,
+	objects = [],
 	radiusSeen,
 	radiusCastOut,
 	radiusCollision,
+	boundCollision,
 	playerX,
 	playerY,
 	playerFrame,
@@ -320,9 +321,9 @@ function setFragments()
 
 function notifyPriests()
 {
-	for( var n = priestsLength; n--; )
+	for( var n = objectsLength; n--; )
 	{
-		var p = priests[n],
+		var p = objects[n],
 			dx = p.x-playerX,
 			dy = p.y-playerY,
 			d = Math.sqrt( dx*dx + dy*dy );
@@ -366,18 +367,16 @@ function drawPriestCrowing( p )
 
 function drawPriestWalking( p )
 {
-	for( var n = 0; n < priestsLength; ++n )
+	for( var n = 0; n < objectsLength; ++n )
 	{
-		var other = priests[n];
+		var other = objects[n],
+			dx,
+			dy;
 
-		if( other === p )
-			continue;
-
-		var dx = other.x-p.x,
-			dy = other.y-p.y,
-			d = dx*dx + dy*dy;
-
-		if( d < radiusCollision )
+		if( other !== p &&
+			(dx = other.x-p.x) < boundCollision &&
+			(dy = other.y-p.y) < boundCollision &&
+			dx*dx + dy*dy < radiusCollision )
 		{
 			p.x += -dx;
 			p.y += -dy;
@@ -449,11 +448,11 @@ function compareY( a, b )
 
 function drawPriests()
 {
-	priests.sort( compareY );
+	objects.sort( compareY );
 
-	for( var n = 0; n < priestsLength; ++n )
+	for( var n = 0; n < objectsLength; ++n )
 	{
-		var p = priests[n];
+		var p = objects[n];
 
 		if( p.crow < now )
 			drawPriestCrowing( p );
@@ -531,7 +530,7 @@ function createPriests()
 		h = mapBottom-mapTop,
 		min = Math.min( w, h )*.3;
 
-	for( var n = priestsLength; n--; )
+	for( var n = objectsLength; n--; )
 	{
 		var a = random()*Math.TAU,
 			speed = (.4+random()*.6)*scaleFactor,
@@ -544,7 +543,7 @@ function createPriests()
 			y = mapTop+random()*h;
 		} while( Math.abs( x-playerX )+Math.abs( y-playerY ) < min );
 
-		priests[n] = {
+		objects[n] = {
 			x: x,
 			y: y,
 			vx: Math.cos( a )*speed,
@@ -594,7 +593,7 @@ function drawYard()
 		map = [],
 		o = 0;
 
-	priestsLength = Math.ceil( Math.sqrt( cols*rows ) );
+	objectsLength = Math.ceil( Math.sqrt( cols*rows ) );
 
 	/*map[o++] = "yardTopLeft";
 
@@ -903,9 +902,11 @@ function resize()
 
 	reset();
 
-	radiusSeen = mapSize*.2 | 0; radiusSeen *= radiusSeen;
+	radiusSeen = mapSize*.2 | 0;
+	radiusSeen *= radiusSeen;
 	radiusCastOut = sprites.ghost0.width*.5 | 0;
 	radiusCollision = radiusCastOut << 4;
+	boundCollision = Math.sqrt( radiusCastOut )*.5 | 0;
 
 	resizing = false;
 }
