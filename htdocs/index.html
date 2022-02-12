@@ -486,38 +486,6 @@ function draw()
 	ctxFg.drawImage( hud, hudX, hudY );
 }
 
-function playSound( id )
-{
-	var e = sounds[id];
-
-	if( !e )
-		return;
-
-	for( var n = audioChannelsLength; n--; )
-	{
-		var ac = audioChannels[n];
-
-		if( ac.finished < now )
-		{
-			ac.finished = now+e.duration*1000;
-
-			var ch = ac.channel;
-
-			if( ch.src != e.src )
-			{
-				ch.src = e.src;
-				ch.load();
-			}
-			else
-				ch.currentTime = 0;
-
-			ch.play();
-
-			break;
-		}
-	}
-}
-
 function random()
 {
 	// from http://indiegamr.com/generate-repeatable-random-numbers-in-js/
@@ -594,39 +562,6 @@ function drawYard()
 		o = 0;
 
 	objectsLength = Math.ceil( Math.sqrt( cols*rows ) );
-
-	/*map[o++] = "yardTopLeft";
-
-	for( var x = cols-2; x--; )
-		map[o++] = "yardTop";
-
-	map[o++] = "yardTopRight";
-
-	for( var y = rows-2; y--; )
-	{
-		map[o++] = "yardLeft";
-
-		for( var n = cols-2; n--; )
-			map[o++] = "yardMiddle";
-
-		map[o++] = "yardRight";
-	}
-
-	map[o++] = "yardBottomLeft";
-
-	for( var x = cols-2; x--; )
-		map[o++] = "yardBottom";
-
-	map[o++] = "yardBottomRight";
-
-	o = 0;
-
-	for( var y = mapTop, r = rows; r--; y += size )
-		for( var x = mapLeft, c = cols; c--; x += size )
-			ctxBg.drawImage(
-				sprites[map[o++]],
-				x | 0,
-				y | 0 );*/
 }
 
 function drawGround()
@@ -732,7 +667,7 @@ function run()
 
 function setPointers( ev, down )
 {
-	var e = ev || event;
+	var e = ev || event;
 
 	if( down < 1 )
 	{
