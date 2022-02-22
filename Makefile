@@ -1,6 +1,7 @@
 HTDOCS = htdocs
+INDEX = $(HTDOCS)/index.html
 SPRITES = sprites/*
-WEBROOT = hhsw.de@ssh.strato.de:sites/proto/boo/
+SERVER = hhsw.de@ssh.strato.de:sites/proto/boo/
 OPTIONS = \
 	--recursive \
 	--links \
@@ -9,17 +10,13 @@ OPTIONS = \
 	--times \
 	--compress
 
-all: atlas live
+all: $(INDEX)
+	rsync $(OPTIONS) $(HTDOCS)/* $(SERVER)
 
-live:
-	rsync $(OPTIONS) \
-		$(HTDOCS)/* \
-		$(WEBROOT)
-
-atlas: $(SPRITES)
+$(INDEX): $(SPRITES)
 	cd $(HTDOCS) && \
-		mkatlas ../$(SPRITES) | \
-		patchatlas index.html && \
+		../bin/mkatlas ../$(SPRITES) | \
+		../bin/patchatlas index.html && \
 		sed -e "s_data:image/png;base64,[/+a-zA-Z0-9=]*_data:image/png;base64,$$(base64 atlas.png | tr -d '\n')_" < index.html > tmp.html && \
 		mv tmp.html index.html && \
 		rm atlas.png
