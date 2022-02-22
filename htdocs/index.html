@@ -172,9 +172,6 @@ var requestAnimFrame =
 	now,
 	last,
 	factor,
-	audioChannelsLength = 4,
-	audioChannels = [],
-	sounds = {},
 	pointerLength = 0,
 	pointerX = [],
 	pointerY = [],
@@ -557,9 +554,7 @@ function drawYard()
 		mw = mapRight-mapLeft,
 		mh = mapBottom-mapTop,
 		cols = mw/size | 0,
-		rows = mh/size | 0,
-		map = [],
-		o = 0;
+		rows = mh/size | 0;
 
 	objectsLength = Math.ceil( Math.sqrt( cols*rows ) );
 }
@@ -646,7 +641,6 @@ function run()
 
 	now = new Date().getTime();
 	factor = (now-last)/16;
-	var fps = 16/(now-last);
 	last = now;
 
 	if( playerAlive &&
@@ -952,27 +946,6 @@ function init()
 	start();
 }
 
-function indexSounds()
-{
-	var audios = document.getElementsByTagName( "audio" );
-
-	if( !audios ||
-		!audios.length )
-		return;
-
-	for( var n = audioChannelsLength; n--; )
-		audioChannels[n] = {
-			channel: new Audio(),
-			finished: 0 };
-
-	for( var n = audios.length; n--; )
-	{
-		var e = audios[n];
-
-		sounds[e.id] = e;
-	}
-}
-
 function createCanvas()
 {
 	if( !(bg = document.createElement( "canvas" )) ||
@@ -1004,8 +977,6 @@ function load()
 		alert( "Sorry, this browser cannot run this game." );
 		return;
 	}
-
-	indexSounds();
 
 	last = new Date().getTime();
 
