@@ -675,8 +675,8 @@ function drawGraves()
 
 			ctxBg.drawImage(
 				sprite,
-				(x+((w-sprite.width) >> 1)) | 0,
-				(y+((h-sprite.height) >> 1)) | 0 );
+				(x+((w-sprite.width) >> 1)+random()*scaleFactor*8) | 0,
+				(y+((h-sprite.height) >> 1)+random()*scaleFactor*8) | 0 );
 		}
 }
 
